@@ -17,14 +17,13 @@ import {
   FiClock,
 } from 'react-icons/fi';
 
+import { BkashIcon, RocketIcon, NagadIcon } from './PaymentIcons';
+
 // Footer Links Configuration
 const FOOTER_LINKS = {
   shop: [
-    { label: 'New Arrivals', href: '/new-arrivals' },
     { label: 'Men', href: '/men' },
-    { label: 'Women', href: '/women' },
-    { label: 'Sale', href: '/sale' },
-    { label: 'Collections', href: '/collections' },
+    { label: 'Women', href: '/women' }
   ],
   company: [
     { label: 'About Us', href: '/about' },
@@ -56,12 +55,23 @@ const SOCIAL_LINKS = [
   { icon: FiYoutube, href: 'https://youtube.com', label: 'YouTube' },
 ];
 
+// Payment methods — clickable links
 const PAYMENT_METHODS = [
-  'Visa',
-  'Mastercard',
-  'PayPal',
-  'Apple Pay',
-  'Google Pay',
+  {
+    label: 'bKash',
+    icon: BkashIcon,
+    href: 'https://www.bkash.com',
+  },
+  {
+    label: 'Rocket',
+    icon: RocketIcon,
+    href: 'https://www.dutchbanglabank.com/rocket/rocket.html',
+  },
+  {
+    label: 'Nagad',
+    icon: NagadIcon,
+    href: 'https://nagad.com.bd',
+  },
 ];
 
 export default function Footer() {
@@ -69,13 +79,11 @@ export default function Footer() {
   const [subscribed, setSubscribed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const footerRef = useRef(null);
-  const linksRef = useRef([]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Newsletter subscription handler
   const handleSubscribe = (e) => {
     e.preventDefault();
     if (email.trim()) {
@@ -85,7 +93,6 @@ export default function Footer() {
     }
   };
 
-  // Link hover animation
   const handleLinkHover = (e) => {
     gsap.to(e.currentTarget, {
       x: 8,
@@ -102,25 +109,17 @@ export default function Footer() {
     });
   };
 
-  // Container variants
   const containerVariants = {
     initial: { opacity: 0 },
     animate: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
     },
   };
 
   const itemVariants = {
     initial: { opacity: 0, y: 20 },
-    animate: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6 },
-    },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   };
 
   const socialIconVariants = {
@@ -143,7 +142,6 @@ export default function Footer() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500 opacity-5 rounded-full blur-3xl" />
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10">
         {/* Newsletter Section */}
         <motion.section
@@ -155,7 +153,6 @@ export default function Footer() {
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              {/* Newsletter Text */}
               <motion.div variants={itemVariants}>
                 <h3 className="text-2xl sm:text-3xl font-light text-white mb-3">
                   Subscribe to Our Newsletter
@@ -165,7 +162,6 @@ export default function Footer() {
                 </p>
               </motion.div>
 
-              {/* Newsletter Form */}
               <motion.form
                 onSubmit={handleSubscribe}
                 className="relative"
@@ -193,13 +189,10 @@ export default function Footer() {
                   </motion.button>
                 </div>
 
-                {/* Success Message */}
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={
-                    subscribed
-                      ? { opacity: 1, y: 0 }
-                      : { opacity: 0, y: -10 }
+                    subscribed ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }
                   }
                   transition={{ duration: 0.3 }}
                   className="absolute top-12 left-0 right-0 text-center text-green-400 text-sm font-medium"
@@ -221,94 +214,37 @@ export default function Footer() {
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {/* Shop Links */}
-              <motion.div variants={itemVariants}>
-                <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-6">
-                  Shop
-                </h4>
-                <ul className="space-y-3">
-                  {FOOTER_LINKS.shop.map((link) => (
-                    <motion.li key={link.href}>
-                      <Link
-                        href={link.href}
-                        onMouseEnter={handleLinkHover}
-                        onMouseLeave={handleLinkHoverEnd}
-                        className="text-gray-400 hover:text-white transition-colors text-sm inline-block"
-                      >
-                        {link.label}
-                      </Link>
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-
-              {/* Company Links */}
-              <motion.div variants={itemVariants}>
-                <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-6">
-                  Company
-                </h4>
-                <ul className="space-y-3">
-                  {FOOTER_LINKS.company.map((link) => (
-                    <motion.li key={link.href}>
-                      <Link
-                        href={link.href}
-                        onMouseEnter={handleLinkHover}
-                        onMouseLeave={handleLinkHoverEnd}
-                        className="text-gray-400 hover:text-white transition-colors text-sm inline-block"
-                      >
-                        {link.label}
-                      </Link>
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-
-              {/* Support Links */}
-              <motion.div variants={itemVariants}>
-                <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-6">
-                  Support
-                </h4>
-                <ul className="space-y-3">
-                  {FOOTER_LINKS.support.map((link) => (
-                    <motion.li key={link.href}>
-                      <Link
-                        href={link.href}
-                        onMouseEnter={handleLinkHover}
-                        onMouseLeave={handleLinkHoverEnd}
-                        className="text-gray-400 hover:text-white transition-colors text-sm inline-block"
-                      >
-                        {link.label}
-                      </Link>
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-
-              {/* Legal Links */}
-              <motion.div variants={itemVariants}>
-                <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-6">
-                  Legal
-                </h4>
-                <ul className="space-y-3">
-                  {FOOTER_LINKS.legal.map((link) => (
-                    <motion.li key={link.href}>
-                      <Link
-                        href={link.href}
-                        onMouseEnter={handleLinkHover}
-                        onMouseLeave={handleLinkHoverEnd}
-                        className="text-gray-400 hover:text-white transition-colors text-sm inline-block"
-                      >
-                        {link.label}
-                      </Link>
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
+              {[
+                { title: 'Shop', links: FOOTER_LINKS.shop },
+                { title: 'Company', links: FOOTER_LINKS.company },
+                { title: 'Support', links: FOOTER_LINKS.support },
+                { title: 'Legal', links: FOOTER_LINKS.legal },
+              ].map((group) => (
+                <motion.div key={group.title} variants={itemVariants}>
+                  <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-6">
+                    {group.title}
+                  </h4>
+                  <ul className="space-y-3">
+                    {group.links.map((link) => (
+                      <motion.li key={link.href}>
+                        <Link
+                          href={link.href}
+                          onMouseEnter={handleLinkHover}
+                          onMouseLeave={handleLinkHoverEnd}
+                          className="text-gray-400 hover:text-white transition-colors text-sm inline-block"
+                        >
+                          {link.label}
+                        </Link>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </motion.div>
+              ))}
             </div>
           </div>
         </motion.section>
 
-        {/* Contact & Social Section */}
+        {/* Contact & Social */}
         <motion.section
           className="border-b border-gray-800 py-12 sm:py-16"
           variants={containerVariants}
@@ -318,7 +254,6 @@ export default function Footer() {
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-              {/* Contact Info */}
               <motion.div variants={itemVariants}>
                 <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-6">
                   Get in Touch
@@ -351,7 +286,6 @@ export default function Footer() {
                 </div>
               </motion.div>
 
-              {/* Hours */}
               <motion.div variants={itemVariants}>
                 <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-6">
                   Business Hours
@@ -359,24 +293,17 @@ export default function Footer() {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <FiClock className="h-4 w-4 text-blue-500" />
-                    <span className="text-gray-400">
-                      Monday - Friday: 9:00 AM - 6:00 PM
-                    </span>
+                    <span className="text-gray-400">Open 7 days a week</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <FiClock className="h-4 w-4 text-blue-500" />
                     <span className="text-gray-400">
-                      Saturday: 10:00 AM - 4:00 PM
+                      Saturday - Friday: 9:00 AM - 9:00 PM
                     </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FiClock className="h-4 w-4 text-blue-500" />
-                    <span className="text-gray-400">Sunday: Closed</span>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Location */}
               <motion.div variants={itemVariants}>
                 <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-6">
                   Location
@@ -394,7 +321,6 @@ export default function Footer() {
               </motion.div>
             </div>
 
-            {/* Social Links */}
             <motion.div
               className="border-t border-gray-800 pt-8"
               variants={itemVariants}
@@ -436,21 +362,31 @@ export default function Footer() {
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-6">
-              Payment Methods
+              We Accept
             </h4>
-            <div className="flex flex-wrap gap-4">
-              {PAYMENT_METHODS.map((method, index) => (
-                <motion.div
-                  key={method}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 text-sm"
-                >
-                  {method}
-                </motion.div>
-              ))}
+            <div className="flex flex-wrap gap-3 sm:gap-4">
+              {PAYMENT_METHODS.map((method, index) => {
+                const Icon = method.icon;
+
+                return (
+                  <motion.a
+                    key={method.label}
+                    href={method.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Pay with ${method.label}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.08 }}
+                    whileHover={{ y: -3, scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="block rounded-lg overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors shadow-sm hover:shadow-lg"
+                  >
+                    <Icon className="block w-[100px] h-10 sm:w-[120px] sm:h-11" />
+                  </motion.a>
+                );
+              })}
             </div>
           </div>
         </motion.section>
@@ -465,12 +401,10 @@ export default function Footer() {
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              {/* Copyright */}
               <p className="text-gray-400 text-sm text-center md:text-left">
                 © 2024 LazaShops. All rights reserved.
               </p>
 
-              {/* Bottom Links */}
               <div className="flex gap-6 text-sm">
                 <Link
                   href="/privacy"
@@ -492,9 +426,10 @@ export default function Footer() {
                 </Link>
               </div>
 
-              {/* Scroll to Top */}
               <motion.button
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                onClick={() =>
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className="p-2 bg-gray-800 hover:bg-blue-600 rounded-lg transition-colors text-white"

@@ -10,8 +10,6 @@ import gsap from 'gsap';
 
 // Navigation links configuration with dropdown support
 const NAV_LINKS = [
-  { label: 'New Arrivals', href: '/new-arrivals' },
-  { label: 'Shop All', href: '/shop-all' },
   {
     label: 'Men',
     dropdown: [

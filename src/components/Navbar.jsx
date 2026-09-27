@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiShoppingCart, FiSearch, FiChevronDown } from 'react-icons/fi';
+import { FiMenu, FiX, FiShoppingCart, FiChevronDown } from 'react-icons/fi';
 import { HiOutlineSun, HiOutlineMoon } from 'react-icons/hi2';
 import { useTheme } from 'next-themes';
 import gsap from 'gsap';
@@ -297,17 +297,6 @@ export default function Navbar() {
 
           {/* Right - Icons */}
           <div className="flex items-center gap-3 sm:gap-6">
-            {/* Search Icon */}
-            <motion.button
-              variants={iconVariants}
-              whileHover="whileHover"
-              whileTap="whileTap"
-              className="text-gray-700 transition-colors duration-200 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-              aria-label="Search"
-            >
-              <FiSearch className="h-5 w-5 sm:h-6 sm:w-6" />
-            </motion.button>
-
             {/* Theme Toggle - Hidden on mobile */}
             <motion.button
               variants={iconVariants}

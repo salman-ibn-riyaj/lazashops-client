@@ -14,14 +14,12 @@ const NAV_LINKS = [
   { label: 'Shop All', href: '/shop-all' },
   {
     label: 'Men',
-    href: '/men',
     dropdown: [
       { label: 'Punjabi', href: '/men/punjabi' },
     ],
   },
   {
     label: 'Women',
-    href: '/women',
     dropdown: [
       { label: 'Top Crop', href: '/women/topcrop' },
     ],
@@ -212,7 +210,7 @@ export default function Navbar() {
           >
             {NAV_LINKS.map((link, index) => (
               <motion.div
-                key={link.href}
+                key={link.label}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 + index * 0.05 }}
@@ -223,14 +221,16 @@ export default function Navbar() {
                 onMouseEnter={() => link.dropdown && handleDropdownEnter(link.label)}
                 onMouseLeave={handleDropdownLeave}
               >
-                <Link
-                  href={link.href}
-                  onMouseEnter={handleLinkHover}
-                  onMouseLeave={handleLinkHoverEnd}
-                  className="relative flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-gray-700 transition-colors duration-200 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-                >
-                  {link.label}
-                  {link.dropdown && (
+                {link.dropdown ? (
+                  // Dropdown-enabled item: no navigation, only toggles dropdown
+                  <button
+                    type="button"
+                    onClick={() => toggleDropdown(link.label)}
+                    onMouseEnter={handleLinkHover}
+                    onMouseLeave={handleLinkHoverEnd}
+                    className="relative flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-gray-700 transition-colors duration-200 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  >
+                    {link.label}
                     <motion.span
                       animate={{ rotate: openDropdown === link.label ? 180 : 0 }}
                       transition={{ duration: 0.2 }}
@@ -238,13 +238,28 @@ export default function Navbar() {
                     >
                       <FiChevronDown className="h-3.5 w-3.5" />
                     </motion.span>
-                  )}
-                  <motion.span
-                    className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400"
-                    whileHover={{ width: '100%' }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                  />
-                </Link>
+                    <motion.span
+                      className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400"
+                      whileHover={{ width: '100%' }}
+                      transition={{ duration: 0.3, ease: 'easeOut' }}
+                    />
+                  </button>
+                ) : (
+                  // Normal link item
+                  <Link
+                    href={link.href}
+                    onMouseEnter={handleLinkHover}
+                    onMouseLeave={handleLinkHoverEnd}
+                    className="relative flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-gray-700 transition-colors duration-200 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  >
+                    {link.label}
+                    <motion.span
+                      className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400"
+                      whileHover={{ width: '100%' }}
+                      transition={{ duration: 0.3, ease: 'easeOut' }}
+                    />
+                  </Link>
+                )}
 
                 {/* Shopify-style Dropdown */}
                 {link.dropdown && (
@@ -357,7 +372,7 @@ export default function Navbar() {
             className="border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
           >
             {NAV_LINKS.map((link) => (
-              <motion.div key={link.href}>
+              <motion.div key={link.label}>
                 {link.dropdown ? (
                   <div>
                     <button

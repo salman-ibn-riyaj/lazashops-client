@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { FiShoppingBag } from 'react-icons/fi';
 
-export default function PunjabiCard({ product }) {
+export default function TopCropCard({ product }) {
   const [selectedColor, setSelectedColor] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -13,7 +13,7 @@ export default function PunjabiCard({ product }) {
   const imageUrl = product.imageUrl;
 
   return (
-    <Link href={`/punjabi/${product._id}`}>
+    <Link href={`/women/topcrop/${product._id}`}>
       <div
         className="group cursor-pointer h-full flex flex-col"
         onMouseEnter={() => setIsHovered(true)}

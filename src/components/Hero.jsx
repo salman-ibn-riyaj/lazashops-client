@@ -233,13 +233,13 @@ export default function Hero() {
                 variants={itemVariants}
                 className="flex flex-col sm:flex-row gap-3 pt-4"
               >
-                <Link href="/mens-thobe" className="flex-1">
+                <Link href="/men/punjabi" className="flex-1">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="w-full px-6 py-3 bg-gray-900 text-white font-medium uppercase tracking-wider rounded-lg hover:bg-black transition-colors flex items-center justify-center gap-2 group"
                   >
-                    Men's Thobe
+                    Men's Punjabi
                     <motion.span
                       initial={{ x: 0 }}
                       whileHover={{ x: 5 }}
@@ -250,13 +250,13 @@ export default function Hero() {
                   </motion.button>
                 </Link>
 
-                <Link href="/womens-abaya" className="flex-1">
+                <Link href="/women/topcrop" className="flex-1">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="w-full px-6 py-3 border-2 border-gray-900 text-gray-900 dark:border-white dark:text-white font-medium uppercase tracking-wider rounded-lg hover:bg-gray-900 hover:text-white dark:hover:bg-white dark:hover:text-gray-900 transition-colors flex items-center justify-center gap-2 group"
                   >
-                    Women's Abaya
+                    Women's Top Crop
                     <motion.span
                       initial={{ x: 0 }}
                       whileHover={{ x: 5 }}

@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiShoppingCart, FiChevronDown } from 'react-icons/fi';
-import { HiOutlineSun, HiOutlineMoon } from 'react-icons/hi2';
-import { useTheme } from 'next-themes';
+import { FiMenu, FiX, FiShoppingCart, FiChevronDown, FiLogOut, FiSettings } from 'react-icons/fi';
 import gsap from 'gsap';
+import { ThemeSwitch } from './ThemeSwitch';
+import { authClient } from '@/lib/auth-client';
 
-// Navigation links configuration with dropdown support
+
 const NAV_LINKS = [
   {
     label: 'Men',
@@ -30,10 +30,17 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const { theme, setTheme } = useTheme();
+  const [showAvatarDropdown, setShowAvatarDropdown] = useState(false);
+
+  // ✅ Reactive session hook — auto updates on sign in/out
+  const { data: session, isPending: isSessionLoading } = authClient.useSession();
+  const user = session?.user || null;
+  const isLoading = isSessionLoading;
+
   const navRef = useRef(null);
   const linksContainerRef = useRef(null);
   const dropdownTimeoutRef = useRef(null);
+  const avatarDropdownRef = useRef(null);
   const dropdownRefs = useRef({});
 
   // Mount check for hydration
@@ -66,6 +73,22 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openDropdown]);
+
+  // Close avatar dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        showAvatarDropdown &&
+        avatarDropdownRef.current &&
+        !avatarDropdownRef.current.contains(e.target)
+      ) {
+        setShowAvatarDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showAvatarDropdown]);
 
   // Menu animation with GSAP
   useEffect(() => {
@@ -122,17 +145,29 @@ export default function Navbar() {
     });
   };
 
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await authClient.signOut();
+      setShowAvatarDropdown(false);
+      setIsMenuOpen(false);
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   // Navbar variants
   const navbarVariants = {
     initial: {
-      backgroundColor: theme === 'dark' ? 'rgba(6, 6, 6, 0)' : 'rgba(255, 255, 255, 0)',
+      backgroundColor: 'rgba(255, 255, 255, 0)',
       backdropFilter: 'blur(0px)',
       borderColor: 'rgba(229, 231, 235, 0)',
     },
     scrolled: {
-      backgroundColor: theme === 'dark' ? 'rgba(6, 6, 6, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
       backdropFilter: 'blur(12px)',
-      borderColor: theme === 'dark' ? 'rgba(55, 65, 81, 0.5)' : 'rgba(229, 231, 235, 1)',
+      borderColor: 'rgba(229, 231, 235, 1)',
     },
   };
 
@@ -166,6 +201,22 @@ export default function Navbar() {
     },
   };
 
+  // Avatar dropdown variants
+  const avatarDropdownVariants = {
+    hidden: {
+      opacity: 0,
+      y: -12,
+      scale: 0.95,
+      transition: { duration: 0.15, ease: 'easeIn' },
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.2, ease: 'easeOut' },
+    },
+  };
+
   // Icon button variants
   const iconVariants = {
     whileHover: { scale: 1.1 },
@@ -177,11 +228,10 @@ export default function Navbar() {
   return (
     <motion.nav
       ref={navRef}
-      className="sticky top-0 z-40 w-full border-b border-gray-200 transition-colors duration-300 dark:border-gray-700"
+      className="sticky top-0 z-40 w-full border-b border-gray-200 transition-colors duration-300 dark:border-gray-700 dark:bg-gray-950/95"
       animate={scrolled ? 'scrolled' : 'initial'}
       variants={navbarVariants}
     >
-      {/* Main navbar container */}
       <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between sm:h-20">
           {/* Left - Logo */}
@@ -199,7 +249,7 @@ export default function Navbar() {
             </Link>
           </motion.div>
 
-          {/* Center - Desktop Navigation (Hidden on mobile) */}
+          {/* Center - Desktop Navigation */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -220,7 +270,6 @@ export default function Navbar() {
                 onMouseLeave={handleDropdownLeave}
               >
                 {link.dropdown ? (
-                  // Dropdown-enabled item: no navigation, only toggles dropdown
                   <button
                     type="button"
                     onClick={() => toggleDropdown(link.label)}
@@ -243,7 +292,6 @@ export default function Navbar() {
                     />
                   </button>
                 ) : (
-                  // Normal link item
                   <Link
                     href={link.href}
                     onMouseEnter={handleLinkHover}
@@ -259,7 +307,6 @@ export default function Navbar() {
                   </Link>
                 )}
 
-                {/* Shopify-style Dropdown */}
                 {link.dropdown && (
                   <AnimatePresence>
                     {openDropdown === link.label && (
@@ -295,25 +342,12 @@ export default function Navbar() {
             ))}
           </motion.div>
 
-          {/* Right - Icons */}
+          {/* Right - Icons and Buttons */}
           <div className="flex items-center gap-3 sm:gap-6">
-            {/* Theme Toggle - Hidden on mobile */}
-            <motion.button
-              variants={iconVariants}
-              whileHover="whileHover"
-              whileTap="whileTap"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="hidden text-gray-700 transition-colors duration-200 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white sm:block"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? (
-                <HiOutlineSun className="h-5 w-5 sm:h-6 sm:w-6" />
-              ) : (
-                <HiOutlineMoon className="h-5 w-5 sm:h-6 sm:w-6" />
-              )}
-            </motion.button>
+            <div className="hidden sm:block">
+              <ThemeSwitch />
+            </div>
 
-            {/* Cart Icon */}
             <motion.button
               variants={iconVariants}
               whileHover="whileHover"
@@ -333,7 +367,119 @@ export default function Navbar() {
               )}
             </motion.button>
 
-            {/* Mobile Menu Button */}
+            {/* Auth Section - Desktop */}
+            {!isLoading && (
+              <div className="hidden lg:flex items-center gap-3">
+                {user ? (
+                  <div className="relative" ref={avatarDropdownRef}>
+                    <motion.button
+                      onClick={() => setShowAvatarDropdown(!showAvatarDropdown)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    >
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm overflow-hidden">
+                        {user.image ? (
+                          <img
+                            src={user.image}
+                            alt={user.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span>{user.name?.[0]?.toUpperCase() || 'U'}</span>
+                        )}
+                      </div>
+                      <motion.span
+                        animate={{ rotate: showAvatarDropdown ? 180 : 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-gray-600 dark:text-gray-400"
+                      >
+                        <FiChevronDown className="h-4 w-4" />
+                      </motion.span>
+                    </motion.button>
+
+                    <AnimatePresence>
+                      {showAvatarDropdown && (
+                        <motion.div
+                          variants={avatarDropdownVariants}
+                          initial="hidden"
+                          animate="visible"
+                          exit="hidden"
+                          className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 overflow-hidden"
+                        >
+                          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                              {user.name}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {user.email}
+                            </p>
+                          </div>
+
+                          <div className="py-2">
+                            <Link
+                              href="/admin/dashboard"
+                              onClick={() => setShowAvatarDropdown(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors duration-150 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                            >
+                              <FiSettings className="h-4 w-4" />
+                              Admin Dashboard
+                            </Link>
+
+                            <button
+                              onClick={handleLogout}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors duration-150 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                            >
+                              <FiLogOut className="h-4 w-4" />
+                              Sign Out
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                    >
+                      <Link
+                        href="/signin"
+                        className="relative px-5 py-2 text-xs font-medium uppercase tracking-wider text-gray-700 transition-all duration-200 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                      >
+                        Sign In
+                        <motion.span
+                          className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400"
+                          whileHover={{ width: '100%' }}
+                          transition={{ duration: 0.3, ease: 'easeOut' }}
+                        />
+                      </Link>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.35 }}
+                    >
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Link
+                          href="/signup"
+                          className="inline-flex items-center justify-center px-6 py-2.5 text-xs font-medium uppercase tracking-wider text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 dark:from-white dark:to-gray-200 dark:text-gray-900 dark:hover:from-gray-100 dark:hover:to-gray-300"
+                        >
+                          Get Started
+                        </Link>
+                      </motion.div>
+                    </motion.div>
+                  </>
+                )}
+              </div>
+            )}
+
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-700 transition-colors duration-200 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white lg:hidden"
@@ -412,13 +558,78 @@ export default function Navbar() {
               </motion.div>
             ))}
 
-            {/* Mobile Theme Toggle */}
-            <motion.button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="w-full border-t border-gray-100 px-4 py-4 text-left text-sm font-medium uppercase tracking-wider text-gray-700 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
-            >
-              {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
-            </motion.button>
+            <div className="border-t border-gray-100 dark:border-gray-800">
+              <div className="flex items-center justify-between px-4 py-4">
+                <span className="text-sm font-medium uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                  Theme
+                </span>
+                <ThemeSwitch />
+              </div>
+            </div>
+
+            {!isLoading && (
+              <div className="border-t border-gray-100 px-4 py-4 dark:border-gray-800">
+                {user ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium overflow-hidden">
+                        {user.image ? (
+                          <img
+                            src={user.image}
+                            alt={user.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span>{user.name?.[0]?.toUpperCase() || 'U'}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate dark:text-gray-400">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Link
+                      href="/admin/dashboard"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-lg border border-gray-300 px-5 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-gray-700 transition-colors duration-200 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                    >
+                      <FiSettings className="h-4 w-4" />
+                      Admin Dashboard
+                    </Link>
+
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center justify-center gap-2 w-full rounded-lg bg-red-50 px-5 py-2.5 text-xs font-medium uppercase tracking-wider text-red-600 transition-colors duration-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                    >
+                      <FiLogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <Link
+                      href="/signin"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="rounded-lg border border-gray-300 px-5 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-gray-700 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/signup"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-gray-900 to-gray-700 px-6 py-2.5 text-xs font-medium uppercase tracking-wider text-white transition-all duration-200 hover:from-gray-800 hover:to-gray-600 dark:from-white dark:to-gray-200 dark:text-gray-900 dark:hover:from-gray-100 dark:hover:to-gray-300"
+                    >
+                      Get Started
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

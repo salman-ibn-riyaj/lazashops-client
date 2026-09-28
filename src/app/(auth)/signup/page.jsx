@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
- // Adjust path
-import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiShield } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiUser, FiMail, FiLock } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast'; // এটি যোগ করুন
 import { authClient } from '@/lib/auth-client';
 
 export default function SignUpPage() {
@@ -43,6 +43,7 @@ export default function SignUpPage() {
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
+      toast.error(validationError); // ভ্যালিডেশন এরর টোস্ট
       return;
     }
 
@@ -57,16 +58,25 @@ export default function SignUpPage() {
 
       if (signUpError) {
         setError(signUpError.message || 'Failed to create account');
+        toast.error(signUpError.message || 'Failed to create account'); // এরর টোস্ট
         setIsLoading(false);
         return;
       }
 
-      // Optional: If you want to set role manually after signup (if not using defaultValue)
-      // await authClient.updateUser({ role: formData.role });
+      // সাফল্যের টোস্ট দেখান
+      toast.success('Account created successfully! 🎉', {
+        duration: 4000,
+        icon: '✨',
+      });
 
-      router.push('/'); // Redirect to home after successful signup
+      // ছোট ডিলে পরে রিডিরেক্ট করুন
+      setTimeout(() => {
+        router.push('/');
+      }, 500);
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      const errorMessage = 'Something went wrong. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   };
@@ -78,7 +88,7 @@ export default function SignUpPage() {
         callbackURL: '/',
       });
     } catch (err) {
-      setError('Google sign-up failed. Please try again.');
+      toast.error('Google sign-up failed. Please try again.');
     }
   };
 

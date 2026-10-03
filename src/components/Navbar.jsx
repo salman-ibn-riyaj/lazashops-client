@@ -8,7 +8,6 @@ import gsap from 'gsap';
 import { ThemeSwitch } from './ThemeSwitch';
 import { authClient } from '@/lib/auth-client';
 
-
 const NAV_LINKS = [
   {
     label: 'Men',
@@ -32,10 +31,13 @@ export default function Navbar() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [showAvatarDropdown, setShowAvatarDropdown] = useState(false);
 
-  // ✅ Reactive session hook — auto updates on sign in/out
+  // Reactive session hook — auto updates on sign in/out
   const { data: session, isPending: isSessionLoading } = authClient.useSession();
   const user = session?.user || null;
   const isLoading = isSessionLoading;
+
+  // ✅ শুধু admin হলে true হবে
+  const isAdmin = user?.role === 'admin';
 
   const navRef = useRef(null);
   const linksContainerRef = useRef(null);
@@ -417,14 +419,17 @@ export default function Navbar() {
                           </div>
 
                           <div className="py-2">
-                            <Link
-                              href="/admin/dashboard"
-                              onClick={() => setShowAvatarDropdown(false)}
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors duration-150 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                            >
-                              <FiSettings className="h-4 w-4" />
-                              Admin Dashboard
-                            </Link>
+                            {/* ✅ শুধু admin হলে Admin Dashboard দেখাবে */}
+                            {isAdmin && (
+                              <Link
+                                href="/dashboard"
+                                onClick={() => setShowAvatarDropdown(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors duration-150 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                              >
+                                <FiSettings className="h-4 w-4" />
+                                Admin Dashboard
+                              </Link>
+                            )}
 
                             <button
                               onClick={handleLogout}
@@ -593,14 +598,17 @@ export default function Navbar() {
                       </div>
                     </div>
 
-                    <Link
-                      href="/admin/dashboard"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg border border-gray-300 px-5 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-gray-700 transition-colors duration-200 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-                    >
-                      <FiSettings className="h-4 w-4" />
-                      Admin Dashboard
-                    </Link>
+                    {/* ✅ শুধু admin হলে Admin Dashboard দেখাবে (mobile) */}
+                    {isAdmin && (
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-lg border border-gray-300 px-5 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-gray-700 transition-colors duration-200 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        <FiSettings className="h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    )}
 
                     <button
                       onClick={handleLogout}

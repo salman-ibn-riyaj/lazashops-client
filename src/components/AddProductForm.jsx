@@ -4,13 +4,12 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import Lenis from "lenis";
-
 import { postData, updateData } from "@/lib/admin-actions";
 import { uploadToImgbb } from "@/lib/actions/action";
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-const CURRENCY = "$";
+const CURRENCY = "৳";
 const MAX_IMAGE_MB = 5;
 
 const CATEGORIES = {
@@ -488,17 +487,10 @@ export default function AddProductForm({ product = null, stats = null }) {
     const res = isEdit
       ? await updateData(categoryKey, product._id, payload)
       : await postData(categoryKey, payload);
+    // On success the server action redirects to /men/punjabi or /women/topcrop,
+    // so we only get here when something went wrong.
     setSubmitting(false);
-
-    if (res.success) {
-      setToast({
-        type: "success",
-        text: isEdit ? "Changes saved" : `Added to ${cfg.label}`,
-      });
-      if (!isEdit) reset();
-    } else {
-      setToast({ type: "error", text: res.message });
-    }
+    if (res && !res.success) setToast({ type: "error", text: res.message });
   };
 
   /* ---- Completeness ------------------------------------------------------ */

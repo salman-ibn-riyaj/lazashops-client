@@ -1,8 +1,9 @@
 "use server";
 
 import { headers } from "next/headers";
-import { auth } from "./auth";
- // <- your Better Auth server instance, fix the path if different
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth"; // <- your Better Auth server instance, fix the path if different
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,6 +11,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const PATHS = {
   punjabi: "/api/punjabi",
   topCrop: "/api/topCrop",
+};
+
+// Where each collection lives on the website (used for redirect + cache refresh)
+const ROUTES = {
+  punjabi: "/men/punjabi",
+  topCrop: "/women/topcrop",
 };
 
 const isAdmin = async () => {
@@ -51,19 +58,35 @@ const mutate = async (collection, suffix, method, body) => {
       return { success: false, message, data: null };
     }
 
-    return { success: true, message: data?.message || "Done", data };
+    // Clear the cached pages so the new data shows up immediately
+    revalidatePath(ROUTES[collection]);
+    revalidatePath("/dashboard/add-product");
+    revalidatePath("/");
+
+    return {
+      success: true,
+      message: data?.message || "Done",
+      data,
+      redirectTo: ROUTES[collection],
+    };
   } catch (error) {
     console.error(`${method} ${path} failed:`, error);
     return { success: false, message: "Could not reach the server", data: null };
   }
 };
 
+// redirect() throws internally, so it must stay outside any try/catch.
+// On success the browser is sent to the collection page and this never returns.
 export async function postData(collection, payload) {
-  return mutate(collection, "", "POST", payload);
+  const result = await mutate(collection, "", "POST", payload);
+  if (result.success) redirect(result.redirectTo);
+  return result;
 }
 
 export async function updateData(collection, id, payload) {
-  return mutate(collection, `/${id}`, "PUT", payload);
+  const result = await mutate(collection, `/${id}`, "PUT", payload);
+  if (result.success) redirect(result.redirectTo);
+  return result;
 }
 
 export async function deleteData(collection, id) {
